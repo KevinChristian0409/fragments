@@ -29,4 +29,12 @@ describe('GET /v1/fragments/:id', () => {
     expect(getRes.statusCode).toBe(200);
     expect(getRes.text).toEqual('This is fragment');
   });
+
+  test('no fragments with the given id returns 404 error', async () => {
+    const getRes = await request(app)
+      .get('/v1/fragments/randomid')
+      .auth('user1@email.com', 'password1');
+
+    expect(getRes.statusCode).toBe(404);
+  });
 });
