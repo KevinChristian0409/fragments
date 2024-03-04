@@ -1,5 +1,8 @@
+################################################################
+#Stage 1: Install the base dependencies
+################################################################
 # Use node version 20.11.0
-FROM node:20.11.0
+FROM node:20.11.0@sha256:7bf4a586b423aac858176b3f683e35f08575c84500fbcfd1d433ad8568972ec6 AS base
 
 LABEL maintainer="Kevin Christian <christiankevin0409@gmail.com>"
 LABEL description="Fragments node.js microservice"
@@ -15,16 +18,28 @@ ENV NPM_CONFIG_LOGLEVEL=warn
 # https://docs.npmjs.com/cli/v8/using-npm/config#color
 ENV NPM_CONFIG_COLOR=false
 
+# Set the NODE_ENV to production
+ENV NODE_ENV=production
+
 # Use /app as our working directory
 WORKDIR /app
 
-# Option 1: explicit path - Copy the package.json and package-lock.json
-# files into /app. NOTE: the trailing `/` on `/app/`, which tells Docker
-# that `app` is a directory and not a file.
+# Copy the package.json and package-lock.json files into /app
 COPY package*.json /app/
 
-# Install node dependencies defined in package-lock.json
-RUN npm install
+# Install node dependencies as defined in the package-lock.json
+RUN npm ci --only=production
+
+################################################################
+#Stage 2: Build and Serve the application
+################################################################
+FROM node:20.11.0@sha256:7bf4a586b423aac858176b3f683e35f08575c84500fbcfd1d433ad8568972ec6 AS build
+
+#Set the working directory
+WORKDIR /app
+
+#Copy the generated node_modules from the previous stage
+COPY --from=base /app/ /app/
 
 # Copy src to /app/src/
 COPY ./src ./src
@@ -32,10 +47,15 @@ COPY ./src ./src
 # Copy our HTPASSWD file
 COPY ./tests/.htpasswd ./tests/.htpasswd
 
+# Added healthcheck
+HEALTHCHECK --interval=30s --timeout=5s \
+  CMD wget -qO- "http://localhost:8080/" || exit 1
+
+# Set the user to "node"
+USER node
+
 # Start the container by running our server
-CMD npm start
+CMD ["npm","start"]
 
 # We run our service on port 8080
 EXPOSE 8080
-
-
