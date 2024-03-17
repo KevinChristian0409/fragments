@@ -1,5 +1,7 @@
 const { randomUUID } = require('crypto');
 const contentType = require('content-type');
+const md = require('markdown-it')();
+
 const {
   readFragment,
   writeFragment,
@@ -110,8 +112,22 @@ class Fragment {
     const { type } = contentType.parse(this.type);
     return type;
   }
+
+  convertType(data, ext) {
+    switch (ext) {
+      case 'text/html':
+        if (this.type === 'text/markdown') {
+          return md.render(data.toString());
+        }
+        return data;
+      case 'text/plain':
+        return data.toString();
+      default:
+        return data;
+    }
+  }
 }
 
-const validTypes = ['text/plain'];
+const validTypes = ['text/plain', 'text/markdown', 'text/html', 'application/json'];
 
 module.exports.Fragment = Fragment;
