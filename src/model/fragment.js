@@ -1,6 +1,8 @@
 const { randomUUID } = require('crypto');
 const contentType = require('content-type');
 const md = require('markdown-it')();
+var mime = require('mime-types');
+const logger = require('../logger');
 
 const {
   readFragment,
@@ -56,6 +58,7 @@ class Fragment {
     try {
       return new Fragment(await readFragment(ownerId, id));
     } catch (error) {
+      logger.error('unable to find fragment by that id');
       throw new Error('unable to find fragment by that id');
     }
   }
@@ -71,15 +74,13 @@ class Fragment {
 
   getData() {
     try {
-      return new Promise((resolve, reject) => {
-        readFragmentData(this.ownerId, this.id)
-          .then((data) => resolve(Buffer.from(data)))
-          .catch(() => {
-            reject(new Error());
-          });
-      });
+      return readFragmentData(this.ownerId, this.id)
+        .then((data) => Buffer.from(data))
+        .catch(() => {
+          throw new Error('unable to get data');
+        });
     } catch (err) {
-      throw new Error(`unable to get data`);
+      throw new Error('unable to get data');
     }
   }
 
@@ -100,7 +101,17 @@ class Fragment {
   }
 
   get formats() {
-    return [this.mimeType];
+    if (this.mimeType === 'text/plain') {
+      return ['text/plain'];
+    } else if (this.mimeType === 'text/markdown') {
+      return ['text/plain', 'text/markdown', 'text/html'];
+    } else if (this.mimeType === 'text/html') {
+      return ['text/plain', 'text/html'];
+    } else if (this.mimeType === 'application/json') {
+      return ['text/plain', 'application/json'];
+    } else {
+      return [this.mimeType];
+    }
   }
 
   static isSupportedType(value) {
@@ -114,17 +125,20 @@ class Fragment {
   }
 
   convertType(data, ext) {
-    switch (ext) {
-      case 'text/html':
-        if (this.type === 'text/markdown') {
-          return md.render(data.toString());
-        }
-        return data;
-      case 'text/plain':
-        return data.toString();
-      default:
-        return data;
+    let desiredType = mime.lookup(ext);
+    const availableFormats = this.formats;
+    if (!availableFormats.includes(desiredType)) {
+      logger.warn('Cant covert to this type');
+      return false;
     }
+    let resultdata = data;
+    if (this.mimeType !== desiredType) {
+      if (this.mimeType === 'text/markdown' && desiredType === 'text/html') {
+        resultdata = md.render(data.toString());
+        resultdata = Buffer.from(resultdata);
+      }
+    }
+    return { resultdata, convertedType: desiredType };
   }
 }
 
