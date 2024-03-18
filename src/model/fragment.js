@@ -14,6 +14,7 @@ const {
 } = require('./data');
 
 class Fragment {
+  // Constructor for Fragment objects
   constructor({
     id = randomUUID(),
     ownerId = '',
@@ -43,6 +44,7 @@ class Fragment {
   }
 
   static async byUser(ownerId, expand = false) {
+    // Retrieves fragments by user
     try {
       const fragments = await listFragments(ownerId, expand);
       if (expand) {
@@ -50,11 +52,13 @@ class Fragment {
       }
       return fragments;
     } catch (err) {
+      logger.error('Error retrieving fragments by user:', err);
       return [];
     }
   }
 
   static async byId(ownerId, id) {
+    // Retrieves a fragment by its ID
     try {
       return new Fragment(await readFragment(ownerId, id));
     } catch (error) {
@@ -64,27 +68,32 @@ class Fragment {
   }
 
   static async delete(ownerId, id) {
+    // Deletes a fragment by its ID
     await deleteFragment(ownerId, id);
   }
 
   async save() {
+    // Saves the fragment
     this.updated = new Date().toISOString();
     await writeFragment(this);
   }
 
   getData() {
     try {
+      // Retrieves data of the fragment
       return readFragmentData(this.ownerId, this.id)
         .then((data) => Buffer.from(data))
         .catch(() => {
           throw new Error('unable to get data');
         });
     } catch (err) {
+      logger.error('Error retrieving fragment data:', err);
       throw new Error('unable to get data');
     }
   }
 
   async setData(data) {
+    // Sets data for the fragment
     if (!data) {
       throw new Error();
     } else {
@@ -96,11 +105,13 @@ class Fragment {
   }
 
   get isText() {
+    // Checks if the fragment is text
     const { type } = contentType.parse(this.type);
     return type.startsWith('text/');
   }
 
   get formats() {
+    // Retrieves formats for the fragment
     if (this.mimeType === 'text/plain') {
       return ['text/plain'];
     } else if (this.mimeType === 'text/markdown') {
@@ -115,16 +126,19 @@ class Fragment {
   }
 
   static isSupportedType(value) {
+    // Checks if the type is supported
     const { type } = contentType.parse(value);
     return validTypes.includes(type);
   }
 
   get mimeType() {
+    // Retrieves mime type of the fragment
     const { type } = contentType.parse(this.type);
     return type;
   }
 
   convertType(data, ext) {
+    // Converts the type of the fragment
     let desiredType = mime.lookup(ext);
     const availableFormats = this.formats;
     if (!availableFormats.includes(desiredType)) {
