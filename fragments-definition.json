@@ -36,6 +36,10 @@
         {
           "name": "AWS_COGNITO_CLIENT_ID",
           "value": "6rq34q7b7prnvv2quhr45tlens"
+        },
+        {
+          "name": "AWS_S3_BUCKET_NAME",
+          "value": "kchristian2-fragments"
         }
       ],
       "environmentFiles": [],
