@@ -19,7 +19,7 @@
       "environment": [
         {
           "name": "AWS_COGNITO_POOL_ID",
-          "value": "us-east-1_ne6ymU18W"
+          "value": "us-east-1_9NYdCuwVL"
         },
         {
           "name": "API_URL",
@@ -35,7 +35,7 @@
         },
         {
           "name": "AWS_COGNITO_CLIENT_ID",
-          "value": "6rq34q7b7prnvv2quhr45tlens"
+          "value": "5i3pi42a05prni6ppamt0iok9n"
         },
         {
           "name": "AWS_S3_BUCKET_NAME",
