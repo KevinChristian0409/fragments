@@ -11,7 +11,7 @@ services:
     # Environment variables to use
     environment:
       # Our API will be running on http://localhost:8080
-      - API_URL=http://localhost:80
+      - API_URL=http://localhost:8080
       # Use Basic Auth (for running tests, CI)
       - HTPASSWD_FILE=tests/.htpasswd
       # Use the LOG_LEVEL set in the host environment, or default to info
@@ -27,10 +27,10 @@ services:
       # something else is defined in the env.
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
       - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
-      - AWS_COGNITO_POOL_ID=us-east-1_9NYdCuwVL
-      - AWS_COGNITO_CLIENT_ID=5i3pi42a05prni6ppamt0iok9n
+      - AWS_COGNITO_POOL_ID=
+      - AWS_COGNITO_CLIENT_ID=
       - DATABASE_STRATEGY=memory
-      - PORT=80
+      - PORT=8080
     # Ports to publish
     ports:
       - '8080:8080'
