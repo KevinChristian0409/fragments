@@ -29,6 +29,8 @@ services:
       - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
       - AWS_COGNITO_POOL_ID=us-east-1_9NYdCuwVL
       - AWS_COGNITO_CLIENT_ID=5i3pi42a05prni6ppamt0iok9n
+      - DATABASE_STRATEGY=memory
+      - PORT=8080
     # Ports to publish
     ports:
       - '8080:8080'
