@@ -2,6 +2,7 @@ const { randomUUID } = require('crypto');
 const contentType = require('content-type');
 const md = require('markdown-it')();
 var mime = require('mime-types');
+const sharp = require('sharp');
 const logger = require('../logger');
 
 const {
@@ -121,7 +122,7 @@ class Fragment {
     } else if (this.mimeType === 'application/json') {
       return ['text/plain', 'application/json'];
     } else {
-      return [this.mimeType];
+      return ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
     }
   }
 
@@ -137,7 +138,7 @@ class Fragment {
     return type;
   }
 
-  convertType(data, ext) {
+  async convertType(data, ext) {
     // Converts the type of the fragment
     let desiredType = mime.lookup(ext);
     const availableFormats = this.formats;
@@ -150,12 +151,29 @@ class Fragment {
       if (this.mimeType === 'text/markdown' && desiredType === 'text/html') {
         resultdata = md.render(data.toString());
         resultdata = Buffer.from(resultdata);
+      } else if (desiredType === 'image/jpeg') {
+        resultdata = await sharp(data).jpeg().toBuffer();
+      } else if (desiredType === 'image/png') {
+        resultdata = await sharp(data).png().toBuffer();
+      } else if (desiredType === 'image/webp') {
+        resultdata = await sharp(data).webp().toBuffer();
+      } else if (desiredType === 'image/gif') {
+        resultdata = await sharp(data).gif().toBuffer();
       }
     }
     return { resultdata, convertedType: desiredType };
   }
 }
 
-const validTypes = ['text/plain', 'text/markdown', 'text/html', 'application/json'];
+const validTypes = [
+  'text/plain',
+  'text/markdown',
+  'text/html',
+  'application/json',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+];
 
 module.exports.Fragment = Fragment;

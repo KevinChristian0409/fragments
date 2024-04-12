@@ -67,4 +67,21 @@ describe('GET /v1/fragments/:id', () => {
 
     expect(getRes.statusCode).toBe(415);
   });
+
+  test('markdown data can be converted to plain text, user can get converted result by specifying extension', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user2@email.com', 'password2')
+      .set('Content-Type', 'text/markdown')
+      .send('# This is fragment again');
+    const id = JSON.parse(postRes.text).fragment.id;
+
+    const getRes = await request(app)
+      .get(`/v1/fragments/${id}.txt`)
+      .auth('user2@email.com', 'password2');
+
+    console.log('getres text:' + getRes.text);
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.headers['content-type']).toEqual('text/plain; charset=utf-8');
+  });
 });
